@@ -90,6 +90,8 @@ next-env.d.ts
 # =========================
 # Misc
 # =========================
+.RECOVERED_FILES/
+RECOVERED_FILES/
 .temp/
 .tmp/
 uploads/
