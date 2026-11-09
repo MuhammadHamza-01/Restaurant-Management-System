@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
 import Category from '../models/Category.js'; // ⚠️ UPDATE THIS PATH to point to your Category model
+import dotenv from 'dotenv';
+dotenv.config();
 
-// ⚠️ CHANGE THIS: Your actual MongoDB connection string
-const MONGO_URI = 'mongodb+srv://Hamza:jTJYMu1QduAKR0Jy@cluster0.1z0s2ou.mongodb.net/RestaurantMS'; 
+const MONGO_URI = process.env.MONGO_URI; 
 
 const categories = [
   {
