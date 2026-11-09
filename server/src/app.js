@@ -8,6 +8,7 @@ import kitchenRoutes from "./routes/kitchenRoutes.js";
 import posRoutes from "./routes/posRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import menuItemRoutes from "./routes/menuItemRoutes.js";
+import tableRoutes from "./routes/tableRoutes.js"
 
 const app = express();
 
@@ -29,5 +30,7 @@ app.use("/api/v1/kitchen", kitchenRoutes);
 app.use("/api/v1/pos", posRoutes);
 app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/menu-items", menuItemRoutes);
+app.use("/api/v1/tables", tableRoutes);
+
 
 export default app;

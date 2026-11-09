@@ -7,6 +7,8 @@ import AdminLayout from "./pages/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import StaffManagement from "./pages/admin/StaffManagement";
 import CategoryManagement from "./pages/admin/CategoryManagement";
+import MenuItemManagement from "./pages/admin/MenuItemManagement";
+import TableManagement from "./pages/admin/TableManagement.jsx";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 import DashboardRedirect from "./routes/DashboardRedirect";
@@ -44,6 +46,8 @@ function App() {
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="staff" element={<StaffManagement />} />
           <Route path="categories" element={<CategoryManagement />} />
+          <Route path="menu-items" element={<MenuItemManagement />} />
+          <Route path="tables" element={<TableManagement />} />
         </Route>
       </Route>
 

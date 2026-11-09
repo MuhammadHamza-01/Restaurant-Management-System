@@ -28,7 +28,7 @@ const menuItems = [
   },
   {
     name: "Menu Management",
-    path: "/admin/menu",
+    path: "/admin/menu-items",
     icon: UtensilsCrossed,
   },
   {

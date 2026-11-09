@@ -63,26 +63,7 @@ export const updateCategory = async (req, res) => {
     const { id } = req.params;
     const { name, description, image, isActive } = req.body;
 
-    if (!name || name.trim().length < 2) {
-      return res.status(400).json({
-        success: false,
-        message: "Category name must be at least 2 characters.",
-      });
-    }
-
-    const category = await Category.findByIdAndUpdate(
-      id,
-      {
-        name: name.trim(),
-        description,
-        image,
-        isActive,
-      },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
+    const category = await Category.findById(id);
 
     if (!category) {
       return res.status(404).json({
@@ -90,6 +71,39 @@ export const updateCategory = async (req, res) => {
         message: "Category not found.",
       });
     }
+
+    // Update only the fields provided
+    if (name !== undefined) {
+      if (typeof name !== "string" || name.trim().length < 2) {
+        return res.status(400).json({
+          success: false,
+          message: "Category name must be at least 2 characters.",
+        });
+      }
+
+      category.name = name.trim();
+    }
+
+    if (description !== undefined) {
+      category.description = description;
+    }
+
+    if (image !== undefined) {
+      category.image = image;
+    }
+
+    if (isActive !== undefined) {
+      if (typeof isActive !== "boolean") {
+        return res.status(400).json({
+          success: false,
+          message: "isActive must be true or false.",
+        });
+      }
+
+      category.isActive = isActive;
+    }
+
+    await category.save();
 
     return res.status(200).json({
       success: true,
@@ -110,6 +124,7 @@ export const updateCategory = async (req, res) => {
     });
   }
 };
+
 
 // Delete a category
 export const deleteCategory = async (req, res) => {
