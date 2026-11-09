@@ -9,6 +9,9 @@ import StaffManagement from "./pages/admin/StaffManagement";
 import CategoryManagement from "./pages/admin/CategoryManagement";
 import MenuItemManagement from "./pages/admin/MenuItemManagement";
 import TableManagement from "./pages/admin/TableManagement.jsx";
+import POS from "./pages/admin/POS.jsx";
+import KitchenDisplay from "./pages/admin/KitchenDisplay.jsx";
+
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 import DashboardRedirect from "./routes/DashboardRedirect";
@@ -48,6 +51,8 @@ function App() {
           <Route path="categories" element={<CategoryManagement />} />
           <Route path="menu-items" element={<MenuItemManagement />} />
           <Route path="tables" element={<TableManagement />} />
+          <Route path="pos" element={<POS />} />
+          <Route path="kds" element={<KitchenDisplay />} />
         </Route>
       </Route>
 

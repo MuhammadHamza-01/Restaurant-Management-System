@@ -7,6 +7,7 @@ import {
   Settings,
   ChefHat,
   FolderOpen,
+  ShoppingCart,
   X,
 } from "lucide-react";
 
@@ -22,9 +23,9 @@ const menuItems = [
     icon: Users,
   },
   {
-  name: "Categories",
-  path: "/admin/categories",
-  icon: FolderOpen,
+    name: "Categories",
+    path: "/admin/categories",
+    icon: FolderOpen,
   },
   {
     name: "Menu Management",
@@ -36,6 +37,19 @@ const menuItems = [
     path: "/admin/tables",
     icon: Table2,
   },
+
+  {
+    name: "Point of Sale",
+    path: "/admin/pos",
+    icon: ShoppingCart,
+  },
+
+  {
+    name: "Kitchen Display",
+    path: "/admin/kds",
+    icon: ShoppingCart,
+  },
+
   {
     name: "Settings",
     path: "/admin/settings",
@@ -83,8 +97,6 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
 
         {/* Navigation */}
         <nav className="flex-1 space-y-2 overflow-y-auto px-4 py-6">
-          
-
           {menuItems.map((item) => {
             const Icon = item.icon;
 
