@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-
+import { Navigate } from "react-router-dom";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import LogoutButton from "./components/common/LogoutButton.jsx";
@@ -11,7 +11,11 @@ import MenuItemManagement from "./pages/admin/MenuItemManagement";
 import TableManagement from "./pages/admin/TableManagement.jsx";
 import POS from "./pages/admin/POS.jsx";
 import KitchenDisplay from "./pages/admin/KitchenDisplay.jsx";
-
+import Billing from "./pages/admin/Billing.jsx";
+import StaffOrders from "./pages/staff/StaffOrders.jsx";
+import StaffPOS from "./pages/staff/StaffPOS.jsx";
+import StaffLayout from "./pages/staff/StaffLayout";
+import StaffDashboard from "./pages/staff/StaffDashboard.jsx";
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 import DashboardRedirect from "./routes/DashboardRedirect";
@@ -42,7 +46,6 @@ function App() {
         <Route path="/menu" element={<Menu />} />
       </Route>
 
-    
       {/* Protected Admin Routes */}
       <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
         <Route path="/admin" element={<AdminLayout />}>
@@ -52,18 +55,22 @@ function App() {
           <Route path="menu-items" element={<MenuItemManagement />} />
           <Route path="tables" element={<TableManagement />} />
           <Route path="pos" element={<POS />} />
-          <Route path="kds" element={<KitchenDisplay />} />
+          <Route path="billing" element={<Billing />} />
+          <Route path="kitchen" element={<KitchenDisplay />} />
         </Route>
       </Route>
 
       {/* Kitchen */}
       <Route element={<ProtectedRoute allowedRoles={["chef"]} />}>
-        <Route path="/kitchen" element={<KitchenDashboard />} />
+        <Route path="/chef/kitchen" element={<KitchenDisplay />} />
       </Route>
 
-      {/* POS */}
-      <Route element={<ProtectedRoute allowedRoles={["admin", "staff"]} />}>
-        <Route path="/pos" element={<POSDashboard />} />
+      <Route element={<ProtectedRoute allowedRoles={["staff"]} />}>
+        <Route path="/staff" element={<StaffLayout />}>
+          <Route path="dashboard" element={<StaffDashboard />} />
+          <Route path="pos" element={<StaffPOS />} />
+          <Route path="orders" element={<StaffOrders />} />
+        </Route>
       </Route>
 
       {/* Delivery */}

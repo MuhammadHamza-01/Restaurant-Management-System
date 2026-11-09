@@ -10,6 +10,7 @@ import menuItemRoutes from "./routes/menuItemRoutes.js";
 import tableRoutes from "./routes/tableRoutes.js"
 import orderRoutes from "./routes/orderRoutes.js"
 import kitchenRoutes from "./routes/kitchenRoutes.js"
+import billingRoutes from "./routes/billingRoutes.js"
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use("/api/v1/menu-items", menuItemRoutes);
 app.use("/api/v1/tables", tableRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/kitchen", kitchenRoutes);
+app.use("/api/v1/billing", billingRoutes);
 
 
 

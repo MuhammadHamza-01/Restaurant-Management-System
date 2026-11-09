@@ -2,27 +2,28 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const DashboardRedirect = () => {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return <div className="flex min-h-screen items-center justify-center">
-      Loading...
-    </div>;
-  }
+  const { user } = useAuth();
 
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  const dashboards = {
-    admin: "/admin/dashboard",
-    chef: "/kitchen",
-    staff: "/pos",
-    delivery: "/delivery",
-    customer: "/menu",
-  };
+  switch (user.role) {
+    case "admin":
+      return <Navigate to="/admin/dashboard" replace />;
 
-  return <Navigate to={dashboards[user.role] || "/login"} replace />;
+    case "staff":
+      return <Navigate to="/staff/dashboard" replace />;
+
+    case "customer":
+      return <Navigate to="/customer/dashboard" replace />;
+
+    case "delivery":
+      return <Navigate to="/delivery/dashboard" replace />;
+
+    default:
+      return <Navigate to="/login" replace />;
+  }
 };
 
 export default DashboardRedirect;

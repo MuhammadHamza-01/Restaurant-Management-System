@@ -5,6 +5,7 @@ import {
   UtensilsCrossed,
   Table2,
   Settings,
+  Receipt,
   ChefHat,
   FolderOpen,
   ShoppingCart,
@@ -43,11 +44,16 @@ const menuItems = [
     path: "/admin/pos",
     icon: ShoppingCart,
   },
+  {
+    name: "Billing & Payments",
+    path: "/admin/billing",
+    icon: Receipt,
+  },
 
   {
     name: "Kitchen Display",
-    path: "/admin/kds",
-    icon: ShoppingCart,
+    path: "/admin/kitchen",
+    icon: ChefHat,
   },
 
   {

@@ -1,3 +1,4 @@
+
 import express from "express";
 import { protect, authorize } from "../middlewares/authMiddleware.js";
 import { ROLES } from "../constants/roles.js";
@@ -11,12 +12,14 @@ import {
 
 const router = express.Router();
 
-// All category routes require admin authentication
-router.use(protect, authorize(ROLES.ADMIN));
+router.use(protect);
 
-router.post("/", createCategory);
-router.get("/", getAllCategories);
-router.patch("/:id", updateCategory);
-router.delete("/:id", deleteCategory);
+// Admin and staff can view categories.
+router.get("/", authorize(ROLES.ADMIN, ROLES.STAFF), getAllCategories);
+
+// Only admin can manage categories.
+router.post("/", authorize(ROLES.ADMIN), createCategory);
+router.patch("/:id", authorize(ROLES.ADMIN), updateCategory);
+router.delete("/:id", authorize(ROLES.ADMIN), deleteCategory);
 
 export default router;

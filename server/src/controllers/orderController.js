@@ -150,3 +150,46 @@ export const getAllOrders = async (req, res) => {
     });
   }
 };
+
+
+
+export const markOrderAsServed = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    if (order.orderStatus !== "ready") {
+      return res.status(400).json({
+        success: false,
+        message: "Only ready orders can be marked as served",
+      });
+    }
+
+    order.orderStatus = "served";
+
+    await order.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Order marked as served successfully",
+      order,
+    });
+  } catch (error) {
+    console.error("Mark order as served error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to mark order as served",
+    });
+  }
+};
+
+

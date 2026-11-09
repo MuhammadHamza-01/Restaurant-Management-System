@@ -13,13 +13,15 @@ import {
 
 const router = express.Router();
 
-// Only authenticated admins can manage restaurant tables
-router.use(protect, authorize(ROLES.ADMIN));
+router.use(protect);
 
-router.post("/", createTable);
-router.get("/", getAllTables);
-router.patch("/:id", updateTable);
-router.patch("/:id/status", updateTableStatus);
-router.delete("/:id", deleteTable);
+// Admin and staff can view tables.
+router.get("/", authorize(ROLES.ADMIN, ROLES.STAFF), getAllTables);
+
+// Only admin can manage tables.
+router.post("/", authorize(ROLES.ADMIN), createTable);
+router.patch("/:id", authorize(ROLES.ADMIN), updateTable);
+router.patch("/:id/status", authorize(ROLES.ADMIN), updateTableStatus);
+router.delete("/:id", authorize(ROLES.ADMIN), deleteTable);
 
 export default router;

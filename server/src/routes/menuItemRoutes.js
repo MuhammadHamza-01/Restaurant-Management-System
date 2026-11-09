@@ -13,14 +13,19 @@ import {
 
 const router = express.Router();
 
-// All menu item routes require admin authentication
-router.use(protect, authorize(ROLES.ADMIN));
+router.use(protect);
 
-router.post("/", createMenuItem);
-router.get("/", getAllMenuItems);
-router.patch("/:id", updateMenuItem);
-router.delete("/:id", deleteMenuItem);
-router.patch("/:id/availability", updateMenuItemAvailability);
+// Admin and staff can view menu items.
+router.get("/", authorize(ROLES.ADMIN, ROLES.STAFF), getAllMenuItems);
+
+// Only admin can manage menu items.
+router.post("/", authorize(ROLES.ADMIN), createMenuItem);
+router.patch("/:id", authorize(ROLES.ADMIN), updateMenuItem);
+router.delete("/:id", authorize(ROLES.ADMIN), deleteMenuItem);
+router.patch(
+  "/:id/availability",
+  authorize(ROLES.ADMIN),
+  updateMenuItemAvailability
+);
 
 export default router;
- 
