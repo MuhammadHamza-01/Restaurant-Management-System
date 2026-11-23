@@ -1,4 +1,3 @@
-
 import express from "express";
 import { protect, authorize } from "../middlewares/authMiddleware.js";
 import { ROLES } from "../constants/roles.js";
@@ -15,10 +14,10 @@ const router = express.Router();
 
 router.use(protect);
 
-// Admin and staff can view tables.
-router.get("/", authorize(ROLES.ADMIN, ROLES.STAFF), getAllTables);
+// Admin and Waiter can view tables.
+router.get("/", authorize(ROLES.ADMIN, ROLES.WAITER), getAllTables);
 
-// Only admin can manage tables.
+// Only Admin can manage tables.
 router.post("/", authorize(ROLES.ADMIN), createTable);
 router.patch("/:id", authorize(ROLES.ADMIN), updateTable);
 router.patch("/:id/status", authorize(ROLES.ADMIN), updateTableStatus);

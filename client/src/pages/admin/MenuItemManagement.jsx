@@ -228,14 +228,8 @@ const MenuItemManagement = () => {
 
       {/* Header */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Menu Items
-          </h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Manage your restaurant food items and prices.
-          </p>
-        </div>
+       
+      
 
         <button
           onClick={openAddModal}

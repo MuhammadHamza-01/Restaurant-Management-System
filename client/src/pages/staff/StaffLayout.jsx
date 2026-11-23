@@ -9,7 +9,7 @@ const StaffLayout = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-gray-50">
 
       {/* Sidebar */}
       <StaffSidebar
@@ -18,13 +18,13 @@ const StaffLayout = () => {
       />
 
       {/* Main Area */}
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col lg:ml-64">
 
         {/* Navbar */}
         <StaffNavbar setIsOpen={setIsOpen} />
 
         {/* Page Content */}
-        <main className="flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">
+        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8">
           <Outlet />
         </main>
 

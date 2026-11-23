@@ -1,13 +1,6 @@
-
 import { useEffect, useState } from "react";
 import api from "../../services/api";
-import {
-  Receipt,
-  Search,
-  CreditCard,
-  Banknote,
-  RefreshCw,
-} from "lucide-react";
+import { Receipt, Search, CreditCard, Banknote, RefreshCw } from "lucide-react";
 
 const Billing = () => {
   const [orders, setOrders] = useState([]);
@@ -49,9 +42,7 @@ const Billing = () => {
     setPayments([]);
 
     try {
-      const response = await api.get(
-        `/billing/orders/${order._id}/payments`
-      );
+      const response = await api.get(`/billing/orders/${order._id}/payments`);
 
       setPayments(response.data.payments || []);
     } catch (error) {
@@ -63,22 +54,17 @@ const Billing = () => {
     try {
       setSaving(true);
 
-      const response = await api.patch(
-        `/billing/orders/${selectedOrder._id}`,
-        {
-          discount: Number(discount),
-          serviceCharge: Number(serviceCharge),
-        }
-      );
+      const response = await api.patch(`/billing/orders/${selectedOrder._id}`, {
+        discount: Number(discount),
+        serviceCharge: Number(serviceCharge),
+      });
 
       setSelectedOrder(response.data.order);
       await fetchOrders();
 
       alert("Bill updated successfully");
     } catch (error) {
-      alert(
-        error.response?.data?.message || "Failed to update bill"
-      );
+      alert(error.response?.data?.message || "Failed to update bill");
     } finally {
       setSaving(false);
     }
@@ -92,13 +78,10 @@ const Billing = () => {
     try {
       setSaving(true);
 
-      await api.post(
-        `/billing/orders/${selectedOrder._id}/payments`,
-        {
-          amount: Number(paymentAmount),
-          method: paymentMethod,
-        }
-      );
+      await api.post(`/billing/orders/${selectedOrder._id}/payments`, {
+        amount: Number(paymentAmount),
+        method: paymentMethod,
+      });
 
       setPaymentAmount("");
 
@@ -106,7 +89,7 @@ const Billing = () => {
 
       const updatedOrder = await api.get("/orders");
       const order = updatedOrder.data.orders.find(
-        (item) => item._id === selectedOrder._id
+        (item) => item._id === selectedOrder._id,
       );
 
       if (order) {
@@ -115,9 +98,7 @@ const Billing = () => {
 
       alert("Payment received successfully");
     } catch (error) {
-      alert(
-        error.response?.data?.message || "Payment failed"
-      );
+      alert(error.response?.data?.message || "Payment failed");
     } finally {
       setSaving(false);
     }
@@ -127,12 +108,10 @@ const Billing = () => {
     const query = search.toLowerCase();
 
     return (
-      ["served", "completed"].includes(order.orderStatus) &&
+      order.orderStatus === "ready" &&
       order.paymentStatus !== "paid" &&
-      (
-        order.orderNumber?.toLowerCase().includes(query) ||
-        order.table?.tableNumber?.toLowerCase().includes(query)
-      )
+      (order.orderNumber?.toLowerCase().includes(query) ||
+        order.table?.tableNumber?.toLowerCase().includes(query))
     );
   });
 
@@ -145,27 +124,13 @@ const Billing = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="mb-7">
-        <h1 className="text-2xl font-bold text-gray-900">
-          Billing & Payments
-        </h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Manage customer bills and receive payments
-        </p>
-      </div>
-
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         {/* Orders list */}
         <div className="rounded-xl border border-gray-200 bg-white p-5 xl:col-span-1">
-          <h2 className="mb-4 font-semibold text-gray-900">
-            Unpaid Orders
-          </h2>
+          <h2 className="mb-4 font-semibold text-gray-900">Unpaid Orders</h2>
 
           <div className="relative mb-4">
-            <Search
-              size={17}
-              className="absolute left-3 top-3 text-gray-400"
-            />
+            <Search size={17} className="absolute left-3 top-3 text-gray-400" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -175,9 +140,7 @@ const Billing = () => {
           </div>
 
           {loading ? (
-            <p className="py-6 text-center text-gray-400">
-              Loading orders...
-            </p>
+            <p className="py-6 text-center text-gray-400">Loading orders...</p>
           ) : filteredOrders.length === 0 ? (
             <p className="py-6 text-center text-sm text-gray-400">
               No unpaid orders available
@@ -199,9 +162,7 @@ const Billing = () => {
                       {order.orderNumber}
                     </span>
                     <span className="text-sm font-bold text-orange-600">
-                      {formatPrice(
-                        order.total - (order.paidAmount || 0)
-                      )}
+                      {formatPrice(order.total - (order.paidAmount || 0))}
                     </span>
                   </div>
 
@@ -247,10 +208,7 @@ const Billing = () => {
               {/* Order items */}
               <div className="mb-6 space-y-3 border-b border-gray-100 pb-5">
                 {selectedOrder.items.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex justify-between text-sm"
-                  >
+                  <div key={index} className="flex justify-between text-sm">
                     <span className="text-gray-600">
                       {item.name} × {item.quantity}
                     </span>
@@ -352,9 +310,7 @@ const Billing = () => {
                         min="1"
                         max={remainingBalance}
                         value={paymentAmount}
-                        onChange={(e) =>
-                          setPaymentAmount(e.target.value)
-                        }
+                        onChange={(e) => setPaymentAmount(e.target.value)}
                         placeholder="Enter amount"
                         className="w-full rounded-lg border border-gray-200 p-3 outline-none focus:border-orange-500"
                       />
@@ -366,16 +322,12 @@ const Billing = () => {
                       </label>
                       <select
                         value={paymentMethod}
-                        onChange={(e) =>
-                          setPaymentMethod(e.target.value)
-                        }
+                        onChange={(e) => setPaymentMethod(e.target.value)}
                         className="w-full rounded-lg border border-gray-200 p-3 outline-none focus:border-orange-500"
                       >
                         <option value="cash">Cash</option>
                         <option value="card">Card</option>
-                        <option value="bank_transfer">
-                          Bank Transfer
-                        </option>
+                        <option value="bank_transfer">Bank Transfer</option>
                       </select>
                     </div>
                   </div>
@@ -409,18 +361,13 @@ const Billing = () => {
                         className="flex items-center justify-between rounded-lg border border-gray-100 p-3"
                       >
                         <div className="flex items-center gap-3">
-                          <Banknote
-                            size={20}
-                            className="text-green-600"
-                          />
+                          <Banknote size={20} className="text-green-600" />
                           <div>
                             <p className="text-sm font-semibold capitalize text-gray-900">
                               {payment.method.replace("_", " ")}
                             </p>
                             <p className="text-xs text-gray-400">
-                              {new Date(
-                                payment.createdAt
-                              ).toLocaleString()}
+                              {new Date(payment.createdAt).toLocaleString()}
                             </p>
                           </div>
                         </div>

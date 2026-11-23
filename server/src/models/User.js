@@ -19,7 +19,6 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
-      index: true,
     },
 
     password: {
@@ -32,7 +31,7 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: ALL_ROLES,
-      default: ROLES.CUSTOMER,
+      default: ROLES.WAITER,
       required: true,
     },
 

@@ -77,7 +77,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
       <aside
         className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col
         bg-[#18181b] text-white transition-transform duration-300
-        lg:static lg:translate-x-0
+        lg:fixed lg:inset-y-0 lg:left-0 lg:translate-x-0
         ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         {/* Logo */}
@@ -102,7 +102,7 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-2 overflow-y-auto px-4 py-6">
+        <nav className="hide-scrollbar flex-1 space-y-2 overflow-y-auto px-4 py-6">
           {menuItems.map((item) => {
             const Icon = item.icon;
 
@@ -128,10 +128,10 @@ const AdminSidebar = ({ isOpen, setIsOpen }) => {
         </nav>
 
         {/* Footer */}
-        <div className="border-t border-white/10 p-5">
+        {/* <div className="border-t border-white/10 p-5">
           <p className="text-xs text-gray-500">Pizza Mahal Management System</p>
           <p className="mt-1 text-xs text-gray-600">Admin Dashboard</p>
-        </div>
+        </div> */}
       </aside>
     </>
   );

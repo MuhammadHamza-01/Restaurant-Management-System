@@ -1,0 +1,6 @@
+export { default as WebsiteLayout } from '../components/WebsiteLayout'
+export { default as HomePage } from './HomePage'
+export { default as MenuPage } from './MenuPage'
+export { default as AboutPage } from './AboutPage'
+export { default as Gallary } from './Gallary'
+export { default as ContactPage } from './ContactPage'

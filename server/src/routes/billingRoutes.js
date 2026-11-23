@@ -12,7 +12,7 @@ import {
 const router = express.Router();
 
 // Only admin and staff can manage billing
-router.use(protect, authorize(ROLES.ADMIN, ROLES.STAFF));
+router.use(protect, authorize(ROLES.ADMIN, ROLES.CASHIER));
 
 // Update discount and service charge
 router.patch("/orders/:id", updateBill);

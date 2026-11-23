@@ -1,3 +1,4 @@
+
 import Order from "../models/Order.js";
 import Payment from "../models/Payment.js";
 
@@ -16,7 +17,13 @@ export const updateBill = async (req, res) => {
       });
     }
 
-    // Do not change the bill after receiving payment
+    if (["completed", "cancelled"].includes(order.orderStatus)) {
+      return res.status(400).json({
+        success: false,
+        message: "This order's bill can no longer be changed",
+      });
+    }
+
     if (order.paidAmount > 0) {
       return res.status(400).json({
         success: false,
@@ -28,7 +35,9 @@ export const updateBill = async (req, res) => {
       discount !== undefined ? Number(discount) : order.discount;
 
     const newServiceCharge =
-      serviceCharge !== undefined ? Number(serviceCharge) : order.serviceCharge;
+      serviceCharge !== undefined
+        ? Number(serviceCharge)
+        : order.serviceCharge;
 
     if (
       !Number.isFinite(newDiscount) ||
@@ -45,17 +54,21 @@ export const updateBill = async (req, res) => {
 
     order.discount = newDiscount;
     order.serviceCharge = newServiceCharge;
-    order.total = order.subtotal - newDiscount + newServiceCharge;
+    order.total = Number(
+      (order.subtotal - newDiscount + newServiceCharge).toFixed(2)
+    );
 
     await order.save();
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Bill updated successfully",
       order,
     });
   } catch (error) {
-    res.status(500).json({
+    console.error("Update bill error:", error);
+
+    return res.status(500).json({
       success: false,
       message: "Failed to update bill",
     });
@@ -64,6 +77,8 @@ export const updateBill = async (req, res) => {
 
 // Record a payment
 export const createPayment = async (req, res) => {
+  let payment;
+
   try {
     const { id } = req.params;
     const { amount, method, reference } = req.body;
@@ -93,7 +108,33 @@ export const createPayment = async (req, res) => {
       });
     }
 
-    const remainingBalance = order.total - order.paidAmount;
+    // Customers pay at the counter after their order is ready.
+    if (order.orderStatus !== "ready") {
+      return res.status(400).json({
+        success: false,
+        message: "Only ready orders can receive payment",
+      });
+    }
+
+    if (order.paymentStatus === "paid") {
+      return res.status(400).json({
+        success: false,
+        message: "This order has already been fully paid",
+      });
+    }
+
+    const currentPaidAmount = Number(order.paidAmount || 0);
+
+    const remainingBalance = Number(
+      (order.total - currentPaidAmount).toFixed(2)
+    );
+
+    if (remainingBalance <= 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No remaining balance",
+      });
+    }
 
     if (paymentAmount > remainingBalance) {
       return res.status(400).json({
@@ -102,7 +143,14 @@ export const createPayment = async (req, res) => {
       });
     }
 
-    const payment = await Payment.create({
+    const newPaidAmount = Number(
+      (currentPaidAmount + paymentAmount).toFixed(2)
+    );
+
+    const isFullyPaid = newPaidAmount >= order.total;
+
+    // Create the payment record first.
+    payment = await Payment.create({
       order: order._id,
       amount: paymentAmount,
       method,
@@ -110,37 +158,62 @@ export const createPayment = async (req, res) => {
       receivedBy: req.user._id,
     });
 
-    order.paidAmount += amount;
+    // Compare-and-set prevents two simultaneous payments from
+    // overwriting each other's balance updates.
+    const updatedOrder = await Order.findOneAndUpdate(
+      {
+        _id: order._id,
+        orderStatus: "ready",
+        paymentStatus: { $ne: "paid" },
+        paidAmount: currentPaidAmount,
+      },
+      {
+        $set: {
+          paidAmount: newPaidAmount,
+          paymentStatus: isFullyPaid ? "paid" : "partial",
+          orderStatus: isFullyPaid ? "completed" : "ready",
+        },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
-    if (order.paidAmount >= order.total) {
-      order.paidAmount = order.total;
-      order.paymentStatus = "paid";
+    if (!updatedOrder) {
+      await Payment.deleteOne({ _id: payment._id });
+      payment = null;
 
-      // Complete the order after full payment.
-      order.orderStatus = "completed";
-    } else {
-      order.paymentStatus = "partial";
-    }
-
-    
-    if (order.orderStatus !== "served") {
-      return res.status(400).json({
+      return res.status(409).json({
         success: false,
-        message: "Only served orders can receive payments",
+        message: "This order was updated by another request. Refresh and try again.",
       });
     }
-    await order.save();
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
-      message: "Payment recorded successfully",
+      message: isFullyPaid
+        ? "Payment received. Order completed successfully."
+        : "Partial payment received successfully.",
       payment,
-      paidAmount: order.paidAmount,
-      remainingBalance: order.total - order.paidAmount,
-      paymentStatus: order.paymentStatus,
+      order: updatedOrder,
+      paidAmount: updatedOrder.paidAmount,
+      remainingBalance: Number(
+        (updatedOrder.total - updatedOrder.paidAmount).toFixed(2)
+      ),
+      paymentStatus: updatedOrder.paymentStatus,
     });
   } catch (error) {
-    res.status(500).json({
+    // Avoid leaving a payment record if the order update fails.
+    if (payment?._id) {
+      await Payment.deleteOne({ _id: payment._id }).catch((cleanupError) => {
+        console.error("Payment cleanup error:", cleanupError);
+      });
+    }
+
+    console.error("Create payment error:", error);
+
+    return res.status(500).json({
       success: false,
       message: "Failed to record payment",
     });
@@ -165,12 +238,14 @@ export const getOrderPayments = async (req, res) => {
       .populate("receivedBy", "name")
       .sort({ createdAt: -1 });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       payments,
     });
   } catch (error) {
-    res.status(500).json({
+    console.error("Get payments error:", error);
+
+    return res.status(500).json({
       success: false,
       message: "Failed to fetch payment history",
     });

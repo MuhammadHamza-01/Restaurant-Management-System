@@ -149,14 +149,7 @@ const CategoryManagement = () => {
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Category Management
-          </h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Organize your restaurant menu into categories.
-          </p>
-        </div>
+        
 
         <button
           onClick={openAddModal}

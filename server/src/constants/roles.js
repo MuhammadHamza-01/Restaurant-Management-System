@@ -1,9 +1,8 @@
 export const ROLES = Object.freeze({
-  CUSTOMER: "customer",
-  DELIVERY: "delivery",
-  STAFF: "staff",
-  CHEF: "chef",
   ADMIN: "admin",
+  WAITER: "waiter",
+  CHEF: "chef",
+  CASHIER: "cashier",
 });
 
 export const ALL_ROLES = Object.values(ROLES);

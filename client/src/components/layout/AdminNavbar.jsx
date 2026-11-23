@@ -7,12 +7,29 @@ const AdminNavbar = ({ setIsOpen }) => {
   const pageTitles = {
     "/admin/dashboard": "Dashboard",
     "/admin/staff": "Staff Management",
-    "/admin/menu": "Menu Management",
+    "/admin/categories": "Category Management",
+    "/admin/menu-items": "Menu Management",
     "/admin/tables": "Table Management",
+    "/admin/pos": "Point of Sale",
+    "/admin/billing": "Billing & Payments",
+    "/admin/kitchen": "Kitchen Display",
+    "/admin/settings": "Settings",
+  };
+
+  const pageDesc = {
+    "/admin/dashboard": "Welcome to Pizza Mahal Management",
+    "/admin/staff": "Manage your restaurant employees and their accounts.",
+    "/admin/categories": "Manage your restaurant categories and subcategories.",
+    "/admin/menu-items": "Manage your restaurant food items and prices.",
+    "/admin/tables": "Manage your restaurant tables and their availability.",
+    "/admin/pos": "Select a table, add menu items, and create a dine-in order.",
+    "/admin/billing": "Manage customer bills and receive payments",
+    "/admin/kitchen": "Manage incoming restaurant orders",
     "/admin/settings": "Settings",
   };
 
   const currentPage = pageTitles[location.pathname] || "Admin Panel";
+  const currentPageDesc = pageDesc[location.pathname] || "Manage your restaurant.";
 
   return (
     <header className="sticky top-0 z-30 flex h-20 items-center justify-between border-b border-gray-200 bg-white px-4 sm:px-6 lg:px-8">
@@ -32,7 +49,7 @@ const AdminNavbar = ({ setIsOpen }) => {
           </h1>
 
           <p className="hidden text-xs text-gray-500 sm:block">
-            Welcome to Pizza Mahal Management
+            {currentPageDesc}
           </p>
         </div>
       </div>

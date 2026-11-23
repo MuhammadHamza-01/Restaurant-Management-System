@@ -1,5 +1,5 @@
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ShoppingCart,
@@ -11,6 +11,8 @@ import {
   Clock3,
   ChefHat,
   AlertCircle,
+  TrendingUp,
+  Utensils,
 } from "lucide-react";
 
 import api from "../../services/api";
@@ -52,11 +54,18 @@ const StaffDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [tables, setTables] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
 
-  const fetchDashboardData = useCallback(async () => {
+  const fetchDashboardData = useCallback(async (isRefresh = false) => {
     try {
       setError("");
+
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
 
       const [ordersResponse, tablesResponse] = await Promise.all([
         api.get("/orders"),
@@ -67,12 +76,14 @@ const StaffDashboard = () => {
       setTables(tablesResponse.data.tables || []);
     } catch (err) {
       console.error("Staff dashboard error:", err);
+
       setError(
         err.response?.data?.message ||
-          "Unable to load dashboard information."
+          "Unable to load dashboard information. Please try again."
       );
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
@@ -82,65 +93,86 @@ const StaffDashboard = () => {
 
   const today = new Date().toDateString();
 
-  const todaysOrders = orders.filter(
-    (order) => new Date(order.createdAt).toDateString() === today
+  const todaysOrders = useMemo(
+    () =>
+      orders.filter(
+        (order) => new Date(order.createdAt).toDateString() === today
+      ),
+    [orders, today]
   );
 
-  const activeOrders = orders.filter((order) =>
-    ACTIVE_STATUSES.includes(order.orderStatus)
+  const activeOrders = useMemo(
+    () =>
+      orders.filter((order) =>
+        ACTIVE_STATUSES.includes(order.orderStatus)
+      ),
+    [orders]
   );
 
-  const occupiedTableIds = new Set(
-    activeOrders
-      .map((order) => order.table?._id || order.table)
-      .filter(Boolean)
-      .map(String)
+  const occupiedTableIds = useMemo(
+    () =>
+      new Set(
+        activeOrders
+          .map((order) => order.table?._id || order.table)
+          .filter(Boolean)
+          .map(String)
+      ),
+    [activeOrders]
   );
 
-  const readyOrders = orders.filter(
-    (order) => order.orderStatus === "ready"
+  const readyOrders = useMemo(
+    () => orders.filter((order) => order.orderStatus === "ready"),
+    [orders]
   );
 
-  const servedToday = todaysOrders.filter((order) =>
-    ["served", "completed"].includes(order.orderStatus)
+  const servedToday = useMemo(
+    () =>
+      todaysOrders.filter((order) =>
+        ["served", "completed"].includes(order.orderStatus)
+      ),
+    [todaysOrders]
   );
 
-  const recentOrders = [...orders]
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() -
-        new Date(a.createdAt).getTime()
-    )
-    .slice(0, 6);
+  const recentOrders = useMemo(
+    () =>
+      [...orders]
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() -
+            new Date(a.createdAt).getTime()
+        )
+        .slice(0, 6),
+    [orders]
+  );
 
   const stats = [
     {
       label: "Today's Orders",
       value: todaysOrders.length,
+      description: "Orders received today",
       icon: ShoppingCart,
       color: "bg-orange-50 text-orange-600",
-      description: "Orders received today",
     },
     {
       label: "Occupied Tables",
       value: occupiedTableIds.size,
+      description: `Out of ${tables.length} total tables`,
       icon: Table2,
       color: "bg-blue-50 text-blue-600",
-      description: `Out of ${tables.length} tables`,
     },
     {
       label: "Ready Orders",
       value: readyOrders.length,
+      description: "Waiting to be served",
       icon: ChefHat,
       color: "bg-emerald-50 text-emerald-600",
-      description: "Waiting to be served",
     },
     {
       label: "Served Today",
       value: servedToday.length,
+      description: "Served or completed",
       icon: CheckCircle2,
       color: "bg-purple-50 text-purple-600",
-      description: "Served or completed",
     },
   ];
 
@@ -148,7 +180,10 @@ const StaffDashboard = () => {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
         <div className="text-center">
-          <RefreshCw className="mx-auto animate-spin text-orange-500" size={30} />
+          <RefreshCw
+            className="mx-auto animate-spin text-orange-500"
+            size={30}
+          />
           <p className="mt-3 text-sm text-gray-500">
             Loading staff dashboard...
           </p>
@@ -159,29 +194,19 @@ const StaffDashboard = () => {
 
   return (
     <div className="space-y-7">
-      {/* Welcome section */}
-      <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-       
-
-        <button
-          type="button"
-          onClick={fetchDashboardData}
-          className="inline-flex items-center justify-center gap-2 self-start rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:border-orange-300 hover:text-orange-600"
-        >
-          <RefreshCw size={16} />
-          Refresh
-        </button>
-      </section>
+      
 
       {/* Error message */}
       {error && (
         <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           <AlertCircle size={19} className="mt-0.5 shrink-0" />
+
           <div>
             <p className="font-semibold">Dashboard data unavailable</p>
             <p className="mt-1">{error}</p>
+
             <button
-              onClick={fetchDashboardData}
+              onClick={() => fetchDashboardData(true)}
               className="mt-2 font-semibold underline"
             >
               Try again
@@ -198,23 +223,26 @@ const StaffDashboard = () => {
           return (
             <div
               key={stat.label}
-              className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm"
+              className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
             >
               <div className="flex items-center justify-between">
                 <div className={`rounded-xl p-3 ${stat.color}`}>
                   <Icon size={22} />
                 </div>
+
                 <span className="text-xs font-medium text-gray-400">
-                  Live data
+                  Today
                 </span>
               </div>
 
               <p className="mt-5 text-sm font-medium text-gray-500">
                 {stat.label}
               </p>
+
               <h3 className="mt-1 text-3xl font-bold text-gray-900">
                 {stat.value}
               </h3>
+
               <p className="mt-1 text-xs text-gray-400">
                 {stat.description}
               </p>
@@ -223,62 +251,58 @@ const StaffDashboard = () => {
         })}
       </section>
 
-      {/* Quick actions */}
-      <section>
-        <div className="mb-4">
-          <h2 className="text-lg font-bold text-gray-900">Quick Actions</h2>
-          <p className="mt-1 text-sm text-gray-500">
-            Jump directly to your daily tasks.
+
+      {/* Restaurant activity */}
+      <section className="grid gap-4 lg:grid-cols-3">
+        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-orange-50 p-3 text-orange-600">
+              <Utensils size={21} />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Active Orders</p>
+              <h3 className="text-2xl font-bold text-gray-900">
+                {activeOrders.length}
+              </h3>
+            </div>
+          </div>
+          <p className="mt-4 text-xs text-gray-400">
+            Orders currently in the service process.
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
-          <Link
-            to="/staff/pos"
-            className="group flex items-center justify-between rounded-2xl bg-[#18181b] p-5 text-white transition hover:bg-gray-800"
-          >
-            <div className="flex items-center gap-4">
-              <div className="rounded-xl bg-orange-500 p-3">
-                <ShoppingCart size={23} />
-              </div>
-              <div>
-                <h3 className="font-bold">Create New Order</h3>
-                <p className="mt-1 text-sm text-gray-400">
-                  Open POS and take a table order
-                </p>
-              </div>
+        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-blue-50 p-3 text-blue-600">
+              <Table2 size={21} />
             </div>
-            <ArrowRight
-              size={20}
-              className="text-gray-400 transition group-hover:translate-x-1 group-hover:text-orange-400"
-            />
-          </Link>
+            <div>
+              <p className="text-sm text-gray-500">Available Tables</p>
+              <h3 className="text-2xl font-bold text-gray-900">
+                {Math.max(tables.length - occupiedTableIds.size, 0)}
+              </h3>
+            </div>
+          </div>
+          <p className="mt-4 text-xs text-gray-400">
+            Tables without an active order.
+          </p>
+        </div>
 
-          <Link
-            to="/staff/orders"
-            className="group flex items-center justify-between rounded-2xl border border-gray-200 bg-white p-5 transition hover:border-orange-200 hover:shadow-sm"
-          >
-            <div className="flex items-center gap-4">
-              <div className="rounded-xl bg-emerald-50 p-3 text-emerald-600">
-                <ClipboardList size={23} />
-              </div>
-              <div>
-                <h3 className="font-bold text-gray-900">Ready Orders</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  View and serve completed kitchen orders
-                </p>
-              </div>
+        <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="rounded-xl bg-purple-50 p-3 text-purple-600">
+              <TrendingUp size={21} />
             </div>
-            <div className="flex items-center gap-2">
-              <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">
-                {readyOrders.length}
-              </span>
-              <ArrowRight
-                size={20}
-                className="text-gray-400 transition group-hover:translate-x-1 group-hover:text-orange-500"
-              />
+            <div>
+              <p className="text-sm text-gray-500">Served Today</p>
+              <h3 className="text-2xl font-bold text-gray-900">
+                {servedToday.length}
+              </h3>
             </div>
-          </Link>
+          </div>
+          <p className="mt-4 text-xs text-gray-400">
+            Successfully served or completed orders.
+          </p>
         </div>
       </section>
 
@@ -329,7 +353,10 @@ const StaffDashboard = () => {
 
               <tbody className="divide-y divide-gray-100">
                 {recentOrders.map((order) => (
-                  <tr key={order._id} className="transition hover:bg-gray-50">
+                  <tr
+                    key={order._id}
+                    className="transition hover:bg-gray-50"
+                  >
                     <td className="px-5 py-4">
                       <span className="font-semibold text-gray-900">
                         {order.orderNumber || "—"}

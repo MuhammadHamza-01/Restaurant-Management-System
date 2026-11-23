@@ -16,7 +16,7 @@ const router = express.Router();
 router.use(protect);
 
 // Admin and staff can view menu items.
-router.get("/", authorize(ROLES.ADMIN, ROLES.STAFF), getAllMenuItems);
+router.get("/", authorize(ROLES.ADMIN, ROLES.WAITER), getAllMenuItems);
 
 // Only admin can manage menu items.
 router.post("/", authorize(ROLES.ADMIN), createMenuItem);

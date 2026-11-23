@@ -166,14 +166,7 @@ const TableManagement = () => {
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            Table Management
-          </h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Manage restaurant tables and seating capacity.
-          </p>
-        </div>
+       
 
         <button
           onClick={openAddModal}

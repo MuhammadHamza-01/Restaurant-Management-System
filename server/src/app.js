@@ -7,10 +7,10 @@ import adminRoutes from "./routes/adminRoutes.js";
 import posRoutes from "./routes/posRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import menuItemRoutes from "./routes/menuItemRoutes.js";
-import tableRoutes from "./routes/tableRoutes.js"
-import orderRoutes from "./routes/orderRoutes.js"
-import kitchenRoutes from "./routes/kitchenRoutes.js"
-import billingRoutes from "./routes/billingRoutes.js"
+import tableRoutes from "./routes/tableRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
+import kitchenRoutes from "./routes/kitchenRoutes.js";
+import billingRoutes from "./routes/billingRoutes.js";
 
 const app = express();
 
@@ -26,9 +26,13 @@ app.use(
 
 app.use(cookieParser());
 
+// Authentication
 app.use("/api/v1/auth", authRoutes);
+
+// Admin and staff management
 app.use("/api/v1/admin", adminRoutes);
-app.use("/api/v1/kitchen", kitchenRoutes);
+
+// Restaurant operations
 app.use("/api/v1/pos", posRoutes);
 app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/menu-items", menuItemRoutes);
@@ -36,7 +40,5 @@ app.use("/api/v1/tables", tableRoutes);
 app.use("/api/v1/orders", orderRoutes);
 app.use("/api/v1/kitchen", kitchenRoutes);
 app.use("/api/v1/billing", billingRoutes);
-
-
 
 export default app;

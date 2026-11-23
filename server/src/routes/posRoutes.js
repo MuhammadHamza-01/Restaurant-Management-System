@@ -7,7 +7,7 @@ const router = express.Router();
 router.get(
   "/dashboard",
   protect,
-  authorize(ROLES.ADMIN, ROLES.STAFF),
+  authorize(ROLES.ADMIN, ROLES.WAITER),
   (req, res) => {
     res.json({
       success: true,

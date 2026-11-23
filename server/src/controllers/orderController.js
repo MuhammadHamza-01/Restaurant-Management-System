@@ -4,28 +4,34 @@ import Order from "../models/Order.js";
 import Table from "../models/Table.js";
 import MenuItem from "../models/MenuItem.js";
 
+const ACTIVE_ORDER_STATUSES = ["pending", "ready"];
+
 // Create a new dine-in order
 export const createOrder = async (req, res) => {
+  let reservedTableId = null;
+
   try {
-    const { table, items, notes } = req.body;
+    const { table, items, notes = "" } = req.body;
 
-    // Validate required fields
-    if (!table || !Array.isArray(items) || items.length === 0) {
+    if (
+      !table ||
+      !mongoose.Types.ObjectId.isValid(table) ||
+      !Array.isArray(items) ||
+      items.length === 0
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Table and order items are required.",
+        message: "A valid table and at least one order item are required.",
       });
     }
 
-    // Validate table ID
-    if (!mongoose.Types.ObjectId.isValid(table)) {
+    if (typeof notes !== "string") {
       return res.status(400).json({
         success: false,
-        message: "Invalid table ID.",
+        message: "Order notes must be text.",
       });
     }
 
-    // Find active table
     const selectedTable = await Table.findOne({
       _id: table,
       isActive: true,
@@ -38,12 +44,10 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    // Check whether the table already has an active order
+    // Check for an existing active order, including older records.
     const existingOrder = await Order.findOne({
       table,
-      orderStatus: {
-        $in: ["pending", "preparing", "ready", "served"],
-      },
+      orderStatus: { $in: ACTIVE_ORDER_STATUSES },
     });
 
     if (existingOrder) {
@@ -53,7 +57,7 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    // Validate and calculate order items
+    // Validate and calculate order items using database prices.
     const orderItems = [];
     let subtotal = 0;
 
@@ -83,43 +87,79 @@ export const createOrder = async (req, res) => {
       }
 
       const quantity = Number(item.quantity);
-      const itemSubtotal = menuItem.price * quantity;
+      const price = Number(menuItem.price);
+      const itemSubtotal = Number((price * quantity).toFixed(2));
 
       orderItems.push({
         menuItem: menuItem._id,
         name: menuItem.name,
         quantity,
-        price: menuItem.price,
+        price,
         subtotal: itemSubtotal,
       });
 
       subtotal += itemSubtotal;
     }
 
-    // Generate order number
-    const orderNumber = `ORD-${Date.now()}`;
+    subtotal = Number(subtotal.toFixed(2));
 
-    // Save order
+    // Atomically reserve the table to prevent simultaneous orders.
+    const reservedTable = await Table.findOneAndUpdate(
+      {
+        _id: table,
+        isActive: true,
+        isOccupied: { $ne: true },
+      },
+      {
+        $set: { isOccupied: true },
+      },
+      {
+        new: true,
+      },
+    );
+
+    if (!reservedTable) {
+      return res.status(409).json({
+        success: false,
+        message: "This table is no longer available.",
+      });
+    }
+
+    reservedTableId = reservedTable._id;
+
+    const orderNumber = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
     const order = await Order.create({
       orderNumber,
-      table: selectedTable._id,
+      table: reservedTable._id,
       items: orderItems,
       subtotal,
       total: subtotal,
-      notes: notes || "",
+      orderStatus: "pending",
+      paymentStatus: "unpaid",
+      paidAmount: 0,
+      notes: notes.trim(),
       createdBy: req.user._id,
     });
-
+    reservedTableId = null;
     const populatedOrder = await Order.findById(order._id)
-      .populate("table", "tableNumber capacity")
-      .populate("createdBy", "name");
+      .populate("table", "tableNumber capacity isOccupied")
+      .populate("createdBy", "name")
+      .populate("items.menuItem", "name");
 
     return res.status(201).json({
       success: true,
-      message: "Order created successfully.",
+      message: "Order sent to kitchen successfully.",
       order: populatedOrder,
     });
   } catch (error) {
+    // Release the table if order creation fails.
+    if (reservedTableId) {
+      await Table.findByIdAndUpdate(reservedTableId, {
+        $set: { isOccupied: false },
+      });
+    }
+
     console.error("Create Order Error:", error);
 
     return res.status(500).json({
@@ -133,7 +173,7 @@ export const createOrder = async (req, res) => {
 export const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find()
-      .populate("table", "tableNumber capacity")
+      .populate("table", "tableNumber capacity isOccupied")
       .populate("createdBy", "name")
       .populate("items.menuItem", "name")
       .sort({ createdAt: -1 });
@@ -144,52 +184,11 @@ export const getAllOrders = async (req, res) => {
       orders,
     });
   } catch (error) {
+    console.error("Get All Orders Error:", error);
+
     return res.status(500).json({
       success: false,
       message: "Unable to fetch orders.",
     });
   }
 };
-
-
-
-export const markOrderAsServed = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const order = await Order.findById(id);
-
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        message: "Order not found",
-      });
-    }
-
-    if (order.orderStatus !== "ready") {
-      return res.status(400).json({
-        success: false,
-        message: "Only ready orders can be marked as served",
-      });
-    }
-
-    order.orderStatus = "served";
-
-    await order.save();
-
-    return res.status(200).json({
-      success: true,
-      message: "Order marked as served successfully",
-      order,
-    });
-  } catch (error) {
-    console.error("Mark order as served error:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Failed to mark order as served",
-    });
-  }
-};
-
-

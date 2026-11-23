@@ -21,20 +21,24 @@ const orderSchema = new mongoose.Schema(
           ref: "MenuItem",
           required: true,
         },
+
         name: {
           type: String,
           required: true,
         },
+
         quantity: {
           type: Number,
           required: true,
           min: 1,
         },
+
         price: {
           type: Number,
           required: true,
           min: 0,
         },
+
         subtotal: {
           type: Number,
           required: true,
@@ -59,9 +63,7 @@ const orderSchema = new mongoose.Schema(
       type: String,
       enum: [
         "pending",
-        "preparing",
         "ready",
-        "served",
         "completed",
         "cancelled",
       ],
@@ -70,7 +72,7 @@ const orderSchema = new mongoose.Schema(
 
     paymentStatus: {
       type: String,
-      enum: ["unpaid", "partial", "paid"],
+      enum: ["unpaid", "paid"],
       default: "unpaid",
     },
 
@@ -104,9 +106,11 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamps: true },
+  {
+    timestamps: true,
+  }
 );
-
+orderSchema.index({ table: 1, orderStatus: 1 });
 const Order = mongoose.model("Order", orderSchema);
 
 export default Order;

@@ -1,85 +1,82 @@
 import { Routes, Route } from "react-router-dom";
-import { Navigate } from "react-router-dom";
-import Login from "./pages/auth/Login";
-import Register from "./pages/auth/Register";
-import LogoutButton from "./components/common/LogoutButton.jsx";
-import AdminLayout from "./pages/admin/AdminLayout";
-import Dashboard from "./pages/admin/Dashboard";
-import StaffManagement from "./pages/admin/StaffManagement";
-import CategoryManagement from "./pages/admin/CategoryManagement";
-import MenuItemManagement from "./pages/admin/MenuItemManagement";
+
+import Login from "./pages/auth/Login.jsx";
+import DashboardLayout from "./components/layout/DashboardLayout.jsx";
+
+import Dashboard from "./pages/admin/Dashboard.jsx";
+import StaffManagement from "./pages/admin/StaffManagement.jsx";
+import CategoryManagement from "./pages/admin/CategoryManagement.jsx";
+import MenuItemManagement from "./pages/admin/MenuItemManagement.jsx";
 import TableManagement from "./pages/admin/TableManagement.jsx";
 import POS from "./pages/admin/POS.jsx";
 import KitchenDisplay from "./pages/admin/KitchenDisplay.jsx";
 import Billing from "./pages/admin/Billing.jsx";
-import StaffOrders from "./pages/staff/StaffOrders.jsx";
-import StaffPOS from "./pages/staff/StaffPOS.jsx";
-import StaffLayout from "./pages/staff/StaffLayout";
+
 import StaffDashboard from "./pages/staff/StaffDashboard.jsx";
+import StaffPOS from "./pages/staff/StaffPOS.jsx";
+import StaffOrders from "./pages/staff/StaffOrders.jsx";
 
-import ProtectedRoute from "./routes/ProtectedRoute";
-import DashboardRedirect from "./routes/DashboardRedirect";
+import ChefDashboard from "./pages/chef/ChefDashboard.jsx";
 
-// Temporary dashboard placeholders
-const Menu = () => (
-  <h1>
-    Customer Menu <LogoutButton className="w-full justify-start" />
-  </h1>
-);
-
-const KitchenDashboard = () => <h1>Kitchen Dashboard</h1>;
-const POSDashboard = () => <h1>POS Dashboard</h1>;
-const DeliveryDashboard = () => <h1>Delivery Dashboard</h1>;
+import ProtectedRoute from "./routes/ProtectedRoute.jsx";
+import DashboardRedirect from "./routes/DashboardRedirect.jsx";
 
 function App() {
   return (
     <Routes>
       {/* Public routes */}
       <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
 
-      {/* Role-based home redirect */}
+      {/* Redirect users according to their role */}
       <Route path="/" element={<DashboardRedirect />} />
 
-      {/* Customer */}
-      <Route element={<ProtectedRoute allowedRoles={["customer"]} />}>
-        <Route path="/menu" element={<Menu />} />
-      </Route>
-
-      {/* Protected Admin Routes */}
+      {/* ADMIN */}
       <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
-        <Route path="/admin" element={<AdminLayout />}>
+        <Route path="/admin" element={<DashboardLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="staff" element={<StaffManagement />} />
           <Route path="categories" element={<CategoryManagement />} />
           <Route path="menu-items" element={<MenuItemManagement />} />
           <Route path="tables" element={<TableManagement />} />
           <Route path="pos" element={<POS />} />
-          <Route path="billing" element={<Billing />} />
           <Route path="kitchen" element={<KitchenDisplay />} />
+          <Route path="billing" element={<Billing />} />
         </Route>
       </Route>
 
-      {/* Kitchen */}
-      <Route element={<ProtectedRoute allowedRoles={["chef"]} />}>
-        <Route path="/chef/kitchen" element={<KitchenDisplay />} />
-      </Route>
-
-      <Route element={<ProtectedRoute allowedRoles={["staff"]} />}>
-        <Route path="/staff" element={<StaffLayout />}>
+      {/* WAITER */}
+      <Route element={<ProtectedRoute allowedRoles={["waiter"]} />}>
+        <Route path="/waiter" element={<DashboardLayout />}>
           <Route path="dashboard" element={<StaffDashboard />} />
           <Route path="pos" element={<StaffPOS />} />
           <Route path="orders" element={<StaffOrders />} />
         </Route>
       </Route>
 
-      {/* Delivery */}
-      <Route element={<ProtectedRoute allowedRoles={["delivery"]} />}>
-        <Route path="/delivery" element={<DeliveryDashboard />} />
+      {/* CHEF */}
+      <Route element={<ProtectedRoute allowedRoles={["chef"]} />}>
+        <Route path="/chef" element={<DashboardLayout />}>
+          <Route path="dashboard" element={<ChefDashboard />} />
+          <Route path="kitchen" element={<KitchenDisplay />} />
+        </Route>
+      </Route>
+
+      {/* CASHIER */}
+      <Route element={<ProtectedRoute allowedRoles={["cashier"]} />}>
+        <Route path="/cashier" element={<DashboardLayout />}>
+          <Route path="billing" element={<Billing />} />
+        </Route>
       </Route>
 
       {/* Not found */}
-      <Route path="*" element={<h1>404 - Page Not Found</h1>} />
+      <Route
+        path="*"
+        element={
+          <div className="flex min-h-screen items-center justify-center">
+            <h1 className="text-2xl font-bold">404 - Page Not Found</h1>
+          </div>
+        }
+      />
     </Routes>
   );
 }

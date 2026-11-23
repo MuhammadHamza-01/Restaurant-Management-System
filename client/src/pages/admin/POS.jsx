@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from "react";
 import {
   Search,
@@ -36,50 +35,27 @@ const POS = () => {
     try {
       setLoading(true);
 
-      const [tableRes, categoryRes, menuRes, orderRes] =
-        await Promise.all([
-          api.get("/tables"),
-          api.get("/categories"),
-          api.get("/menu-items"),
-          api.get("/orders"),
-        ]);
+      const [tableRes, categoryRes, menuRes] = await Promise.all([
+        api.get("/tables"),
+        api.get("/categories"),
+        api.get("/menu-items"),
+      ]);
 
-      const activeOrders = orderRes.data.orders.filter((order) =>
-        ["pending", "preparing", "ready", "served"].includes(
-          order.orderStatus
-        )
-      );
+      
 
-      const occupiedTableIds = activeOrders.map((order) =>
-        typeof order.table === "object"
-          ? order.table._id
-          : order.table
-      );
-
-      setTables(
-        tableRes.data.tables
-          .filter((table) => table.isActive)
-          .map((table) => ({
-            ...table,
-            isOccupied: occupiedTableIds.includes(table._id),
-          }))
-      );
+      setTables(tableRes.data.tables.filter((table) => table.isActive));
 
       setCategories(
-        categoryRes.data.categories.filter(
-          (category) => category.isActive
-        )
+        categoryRes.data.categories.filter((category) => category.isActive),
       );
 
       setMenuItems(
         menuRes.data.menuItems.filter(
-          (item) => item.isAvailable && item.category?.isActive !== false
-        )
+          (item) => item.isAvailable && item.category?.isActive !== false,
+        ),
       );
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Unable to load POS data."
-      );
+      setError(err.response?.data?.message || "Unable to load POS data.");
     } finally {
       setLoading(false);
     }
@@ -93,8 +69,7 @@ const POS = () => {
   const filteredItems = useMemo(() => {
     return menuItems.filter((item) => {
       const matchesCategory =
-        selectedCategory === "all" ||
-        item.category?._id === selectedCategory;
+        selectedCategory === "all" || item.category?._id === selectedCategory;
 
       const matchesSearch = item.name
         .toLowerCase()
@@ -111,14 +86,14 @@ const POS = () => {
 
     setCart((currentCart) => {
       const existing = currentCart.find(
-        (cartItem) => cartItem._id === item._id
+        (cartItem) => cartItem._id === item._id,
       );
 
       if (existing) {
         return currentCart.map((cartItem) =>
           cartItem._id === item._id
             ? { ...cartItem, quantity: cartItem.quantity + 1 }
-            : cartItem
+            : cartItem,
         );
       }
 
@@ -133,23 +108,21 @@ const POS = () => {
         .map((item) =>
           item._id === itemId
             ? { ...item, quantity: item.quantity + amount }
-            : item
+            : item,
         )
-        .filter((item) => item.quantity > 0)
+        .filter((item) => item.quantity > 0),
     );
   };
 
   // Remove item from cart
   const removeFromCart = (itemId) => {
-    setCart((currentCart) =>
-      currentCart.filter((item) => item._id !== itemId)
-    );
+    setCart((currentCart) => currentCart.filter((item) => item._id !== itemId));
   };
 
   // Calculate subtotal
   const subtotal = cart.reduce(
     (total, item) => total + item.price * item.quantity,
-    0
+    0,
   );
 
   const formatPrice = (price) =>
@@ -185,7 +158,7 @@ const POS = () => {
       });
 
       setMessage(
-        `Order ${response.data.order.orderNumber} created successfully!`
+        `Order ${response.data.order.orderNumber} created successfully!`,
       );
 
       setCart([]);
@@ -193,9 +166,7 @@ const POS = () => {
 
       await fetchPOSData();
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Unable to place order."
-      );
+      setError(err.response?.data?.message || "Unable to place order.");
 
       await fetchPOSData();
     } finally {
@@ -214,25 +185,12 @@ const POS = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">
-          Point of Sale
-        </h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Select a table, add menu items, and create a dine-in order.
-        </p>
-      </div>
-
       {/* Notifications */}
       {message && (
         <div className="flex items-center gap-2 rounded-xl bg-green-50 p-4 text-sm text-green-700">
           <CheckCircle size={18} />
           {message}
-          <button
-            onClick={() => setMessage("")}
-            className="ml-auto"
-          >
+          <button onClick={() => setMessage("")} className="ml-auto">
             <X size={17} />
           </button>
         </div>
@@ -241,10 +199,7 @@ const POS = () => {
       {error && (
         <div className="flex items-center gap-2 rounded-xl bg-red-50 p-4 text-sm text-red-600">
           {error}
-          <button
-            onClick={() => setError("")}
-            className="ml-auto"
-          >
+          <button onClick={() => setError("")} className="ml-auto">
             <X size={17} />
           </button>
         </div>
@@ -254,9 +209,7 @@ const POS = () => {
       <section className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h2 className="font-semibold text-gray-900">
-              Select a Table
-            </h2>
+            <h2 className="font-semibold text-gray-900">Select a Table</h2>
             <p className="mt-1 text-sm text-gray-500">
               Choose an available table for this order.
             </p>
@@ -280,16 +233,14 @@ const POS = () => {
                   selectedTable?._id === table._id
                     ? "border-orange-500 bg-orange-50 ring-2 ring-orange-100"
                     : table.isOccupied
-                    ? "cursor-not-allowed border-red-100 bg-red-50 opacity-60"
-                    : "border-gray-200 bg-white hover:border-orange-300 hover:bg-orange-50"
+                      ? "cursor-not-allowed border-red-100 bg-red-50 opacity-60"
+                      : "border-gray-200 bg-white hover:border-orange-300 hover:bg-orange-50"
                 }`}
               >
                 <Armchair
                   size={22}
                   className={
-                    table.isOccupied
-                      ? "text-red-500"
-                      : "text-orange-600"
+                    table.isOccupied ? "text-red-500" : "text-orange-600"
                   }
                 />
 
@@ -303,9 +254,7 @@ const POS = () => {
 
                 <p
                   className={`mt-2 text-xs font-semibold ${
-                    table.isOccupied
-                      ? "text-red-600"
-                      : "text-green-600"
+                    table.isOccupied ? "text-red-600" : "text-green-600"
                   }`}
                 >
                   {table.isOccupied ? "Occupied" : "Available"}
@@ -367,10 +316,7 @@ const POS = () => {
           {/* Menu Items */}
           {filteredItems.length === 0 ? (
             <div className="rounded-2xl border border-gray-100 bg-white py-16 text-center">
-              <UtensilsCrossed
-                size={36}
-                className="mx-auto text-gray-300"
-              />
+              <UtensilsCrossed size={36} className="mx-auto text-gray-300" />
               <p className="mt-3 font-medium text-gray-700">
                 No menu items found
               </p>
@@ -394,17 +340,12 @@ const POS = () => {
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <UtensilsCrossed
-                        size={38}
-                        className="text-orange-300"
-                      />
+                      <UtensilsCrossed size={38} className="text-orange-300" />
                     )}
                   </div>
 
                   <div className="p-4">
-                    <p className="font-semibold text-gray-900">
-                      {item.name}
-                    </p>
+                    <p className="font-semibold text-gray-900">{item.name}</p>
 
                     <p className="mt-1 text-xs text-gray-500">
                       {item.category?.name}
@@ -430,9 +371,7 @@ const POS = () => {
         <aside className="h-fit rounded-2xl border border-gray-100 bg-white shadow-sm xl:sticky xl:top-6">
           <div className="flex items-center justify-between border-b border-gray-100 p-5">
             <div>
-              <h2 className="font-bold text-gray-900">
-                Current Order
-              </h2>
+              <h2 className="font-bold text-gray-900">Current Order</h2>
               <p className="mt-1 text-xs text-gray-500">
                 {cart.length} different item(s)
               </p>
@@ -456,10 +395,7 @@ const POS = () => {
           <div className="max-h-[400px] space-y-4 overflow-y-auto p-5">
             {cart.length === 0 ? (
               <div className="py-10 text-center">
-                <ShoppingCart
-                  size={34}
-                  className="mx-auto text-gray-300"
-                />
+                <ShoppingCart size={34} className="mx-auto text-gray-300" />
                 <p className="mt-3 text-sm font-medium text-gray-600">
                   Your cart is empty
                 </p>
@@ -469,10 +405,7 @@ const POS = () => {
               </div>
             ) : (
               cart.map((item) => (
-                <div
-                  key={item._id}
-                  className="flex items-start gap-3"
-                >
+                <div key={item._id} className="flex items-start gap-3">
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-gray-900">
                       {item.name}

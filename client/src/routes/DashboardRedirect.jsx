@@ -1,8 +1,16 @@
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const DashboardRedirect = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        Loading...
+      </div>
+    );
+  }
 
   if (!user) {
     return <Navigate to="/login" replace />;
@@ -12,14 +20,14 @@ const DashboardRedirect = () => {
     case "admin":
       return <Navigate to="/admin/dashboard" replace />;
 
-    case "staff":
-      return <Navigate to="/staff/dashboard" replace />;
+    case "waiter":
+      return <Navigate to="/waiter/dashboard" replace />;
 
-    case "customer":
-      return <Navigate to="/customer/dashboard" replace />;
+    case "chef":
+      return <Navigate to="/chef/dashboard" replace />;
 
-    case "delivery":
-      return <Navigate to="/delivery/dashboard" replace />;
+    case "cashier":
+      return <Navigate to="/cashier/billing" replace />;
 
     default:
       return <Navigate to="/login" replace />;

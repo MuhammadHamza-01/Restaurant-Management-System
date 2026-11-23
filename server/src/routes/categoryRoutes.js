@@ -15,7 +15,7 @@ const router = express.Router();
 router.use(protect);
 
 // Admin and staff can view categories.
-router.get("/", authorize(ROLES.ADMIN, ROLES.STAFF), getAllCategories);
+router.get("/", authorize(ROLES.ADMIN, ROLES.WAITER), getAllCategories);
 
 // Only admin can manage categories.
 router.post("/", authorize(ROLES.ADMIN), createCategory);

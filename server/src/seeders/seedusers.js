@@ -9,18 +9,17 @@ const MONGO_URI = process.env.MONGO_URI;
 import User from '../models/User.js';
 
 // The common password for all 10 users
-const commonPassword = 'Hamza123'; 
+const commonPassword = 'hamza123'; 
 
 const dummyUsers = [
-  { name: 'Hamza Admin', email: 'hamzadev2003@gmail.com', role: 'admin' },
-  { name: 'Sara Staff', email: 'staff1@example.com', role: 'staff' },
-  { name: 'Usman Staff', email: 'staff2@example.com', role: 'staff' },
+  { name: 'Muhammad Hamza', email: 'hamzadev2003@gmail.com', role: 'admin' },
+  { name: 'Sara Waiter', email: 'waiter@example.com', role: 'waiter' },
+  { name: 'Usman Waiter', email: 'waiter2@example.com', role: 'waiter' },
   { name: 'Omar chef', email: 'chef3@example.com', role: 'chef' },
-  { name: 'Fatima Staff', email: 'staff3@example.com', role: 'staff' },
-  { name: 'Bilal Customer', email: 'customer1@example.com', role: 'customer' },
-  { name: 'Ayesha Customer', email: 'customer2@example.com', role: 'customer' },
+  { name: 'Bilal cashier', email: 'cashier@example.com', role: 'cashier' },
+  { name: 'Ayesha cashier', email: 'cashier2@example.com', role: 'cashier' },
   { name: 'Zain chef', email: 'chef@example.com', role: 'chef' },
-  { name: 'Mariam Customer', email: 'customer4@example.com', role: 'customer' },
+  { name: 'Mariam cashier', email: 'cashier@example.com', role: 'cashier' },
   { name: 'Omar chef', email: 'chef2@example.com', role: 'chef' }
 ];
 

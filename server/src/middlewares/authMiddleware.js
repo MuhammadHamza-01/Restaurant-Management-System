@@ -1,7 +1,9 @@
 import jwt from "jsonwebtoken";
+
 import User from "../models/User.js";
 import { ALL_ROLES } from "../constants/roles.js";
 
+// Verify authentication
 export const protect = async (req, res, next) => {
   try {
     const token = req.cookies?.token;
@@ -38,7 +40,14 @@ export const protect = async (req, res, next) => {
 // Check whether the user has an allowed role
 export const authorize = (...roles) => {
   return (req, res, next) => {
-    if (!req.user || !roles.includes(req.user.role)) {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required.",
+      });
+    }
+
+    if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
         message: "You do not have permission to access this resource.",
@@ -49,7 +58,7 @@ export const authorize = (...roles) => {
   };
 };
 
-// Optional: Validate role values when creating or assigning accounts
+// Validate role values
 export const isValidRole = (role) => {
   return ALL_ROLES.includes(role);
 };

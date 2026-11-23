@@ -1,64 +1,14 @@
 import User from "../models/User.js";
-import { ROLES } from "../constants/roles.js";
 import { setTokenCookie } from "../utils/setTokenCookie.js";
 
-// @desc    Register a new customer
+// @desc    Public registration disabled
 // @route   POST /api/v1/auth/register
 // @access  Public
 export const register = async (req, res) => {
-  try {
-    const { name, email, password } = req.body;
-
-    if (!name || !email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Please provide name, email and password.",
-      });
-    }
-
-    if (password.length < 8) {
-      return res.status(400).json({
-        success: false,
-        message: "Password must be at least 8 characters.",
-      });
-    }
-
-    const existingUser = await User.findOne({ email });
-
-    if (existingUser) {
-      return res.status(409).json({
-        success: false,
-        message: "Email is already registered.",
-      });
-    }
-
-    const user = await User.create({
-      name,
-      email,
-      password,
-      role: ROLES.CUSTOMER,
-    });
-
-    setTokenCookie(res, user._id);
-
-    res.status(201).json({
-      success: true,
-      message: "Account registered successfully.",
-      user,
-    });
-  } catch (error) {
-    if (error.code === 11000) {
-      return res.status(409).json({
-        success: false,
-        message: "Email is already registered.",
-      });
-    }
-
-    res.status(500).json({
-      success: false,
-      message: "Registration failed.",
-    });
-  }
+  return res.status(403).json({
+    success: false,
+    message: "Public registration is disabled. Contact your administrator.",
+  });
 };
 
 // @desc    Login user
@@ -94,17 +44,20 @@ export const login = async (req, res) => {
     }
 
     user.lastLoginAt = new Date();
+
     await user.save();
 
     setTokenCookie(res, user._id);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Login successful.",
       user,
     });
   } catch (error) {
-    res.status(500).json({
+    console.error("Login error:", error);
+
+    return res.status(500).json({
       success: false,
       message: "Login failed.",
     });
@@ -115,7 +68,7 @@ export const login = async (req, res) => {
 // @route   GET /api/v1/auth/me
 // @access  Private
 export const getMe = async (req, res) => {
-  res.status(200).json({
+  return res.status(200).json({
     success: true,
     user: req.user,
   });

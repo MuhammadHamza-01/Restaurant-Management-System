@@ -40,7 +40,7 @@ const StaffSidebar = ({ isOpen, setIsOpen }) => {
       <aside
         className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col
         bg-[#18181b] text-white transition-transform duration-300
-        lg:static lg:translate-x-0
+        lg:fixed lg:inset-y-0 lg:left-0 lg:translate-x-0
         ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         {/* Logo */}
@@ -65,7 +65,7 @@ const StaffSidebar = ({ isOpen, setIsOpen }) => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 space-y-2 overflow-y-auto px-4 py-6">
+        <nav className="hide-scrollbar flex-1 space-y-2 overflow-y-auto px-4 py-6">
           <p className="mb-4 px-4 text-xs font-semibold uppercase tracking-wider text-gray-500">
             Workspace
           </p>
